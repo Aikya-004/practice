@@ -13,8 +13,13 @@ import {
   IonIcon,
   IonFooter,
   IonAlert,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
 } from '@ionic/react';
 import { checkmarkCircle, closeCircle } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
 import './Signup.css';
 import useSQLiteDB from '../composables/useSQLiteDB';
 
@@ -27,9 +32,10 @@ const Signup: React.FC = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
 
+  const history = useHistory();
   const { registerUser, initialized } = useSQLiteDB(pharmacyName);
 
-  const pharmacyNameRegex = /^[A-Z][a-z]*$/;
+  const pharmacyNameRegex = /^[a-z]*$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneNumberRegex = /^\d{10}$/;
 
@@ -54,6 +60,17 @@ const Signup: React.FC = () => {
     registerUser(pharmacyName, email, phoneNumber, password, () => {
       setAlertMessage('Signup successful!');
       setShowAlert(true);
+      // Redirect to homeafterlogin page after successful signup
+
+
+      
+        // On successful login, redirect to Home page with pharmacyName in state
+        history.push({
+          pathname: '/homeafterlogin',
+          state: { pharmacyName }
+        });
+     
+
     }, (error) => {
       setAlertMessage(error.message);
       setShowAlert(true);
@@ -61,77 +78,84 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <IonPage>
-      <IonHeader>
+    <IonPage className="signup-page">
+      <IonHeader className="signup-header">
         <IonToolbar>
-          <IonTitle>Signup</IonTitle>
+          <IonTitle>Welcome User</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className='signup-content'>
-        <IonItem>
-          <IonLabel position="floating">Pharmacy Name</IonLabel>
-          <IonInput value={pharmacyName} onIonChange={(e) => setPharmacyName(e.detail.value!)}></IonInput>
-          {pharmacyName && (
-            <IonIcon
-              icon={validatePharmacyName() ? checkmarkCircle : closeCircle}
-              color={validatePharmacyName() ? 'success' : 'danger'}
-            />
-          )}
-        </IonItem>
-        {!validatePharmacyName() && pharmacyName && (
-          <IonText color="danger">Pharmacy name must start with a capital letter and contain only lowercase letters.</IonText>
-        )}
+      <IonContent className="signup-content">
+        <IonCard className="signup-card">
+          <IonCardHeader>
+            <IonCardTitle>Create Your Account</IonCardTitle>
+          </IonCardHeader>
+          <IonCardContent>
+            <IonItem className="signup-item">
+              <IonLabel position="floating">Pharmacy Name</IonLabel>
+              <IonInput value={pharmacyName} onIonChange={(e) => setPharmacyName(e.detail.value!)}></IonInput>
+              {pharmacyName && (
+                <IonIcon
+                  icon={validatePharmacyName() ? checkmarkCircle : closeCircle}
+                  color={validatePharmacyName() ? 'success' : 'danger'}
+                />
+              )}
+            </IonItem>
+            {!validatePharmacyName() && pharmacyName && (
+              <IonText color="danger" className="signup-error-text">Pharmacy name must start with a capital letter and contain only lowercase letters.</IonText>
+            )}
 
-        <IonItem>
-          <IonLabel position="floating">Email</IonLabel>
-          <IonInput type="email" value={email} onIonChange={(e) => setEmail(e.detail.value!)}></IonInput>
-          {email && (
-            <IonIcon
-              icon={validateEmail() ? checkmarkCircle : closeCircle}
-              color={validateEmail() ? 'success' : 'danger'}
-            />
-          )}
-        </IonItem>
-        {!validateEmail() && email && (
-          <IonText color="danger">Please enter a valid email address.</IonText>
-        )}
+            <IonItem className="signup-item">
+              <IonLabel position="floating">Email</IonLabel>
+              <IonInput type="email" value={email} onIonChange={(e) => setEmail(e.detail.value!)}></IonInput>
+              {email && (
+                <IonIcon
+                  icon={validateEmail() ? checkmarkCircle : closeCircle}
+                  color={validateEmail() ? 'success' : 'danger'}
+                />
+              )}
+            </IonItem>
+            {!validateEmail() && email && (
+              <IonText color="danger" className="signup-error-text">Please enter a valid email address.</IonText>
+            )}
 
-        <IonItem>
-          <IonLabel position="floating">Phone Number</IonLabel>
-          <IonInput type="tel" value={phoneNumber} onIonChange={(e) => setPhoneNumber(e.detail.value!)}></IonInput>
-          {phoneNumber && (
-            <IonIcon
-              icon={validatePhoneNumber() ? checkmarkCircle : closeCircle}
-              color={validatePhoneNumber() ? 'success' : 'danger'}
-            />
-          )}
-        </IonItem>
-        {!validatePhoneNumber() && phoneNumber && (
-          <IonText color="danger">Phone number must be 10 digits.</IonText>
-        )}
+            <IonItem className="signup-item">
+              <IonLabel position="floating">Phone Number</IonLabel>
+              <IonInput type="tel" value={phoneNumber} onIonChange={(e) => setPhoneNumber(e.detail.value!)}></IonInput>
+              {phoneNumber && (
+                <IonIcon
+                  icon={validatePhoneNumber() ? checkmarkCircle : closeCircle}
+                  color={validatePhoneNumber() ? 'success' : 'danger'}
+                />
+              )}
+            </IonItem>
+            {!validatePhoneNumber() && phoneNumber && (
+              <IonText color="danger" className="signup-error-text">Phone number must be 10 digits.</IonText>
+            )}
 
-        <IonItem>
-          <IonLabel position="floating">Password</IonLabel>
-          <IonInput type="password" value={password} onIonChange={(e) => setPassword(e.detail.value!)}></IonInput>
-        </IonItem>
+            <IonItem className="signup-item">
+              <IonLabel position="floating">Password</IonLabel>
+              <IonInput type="password" value={password} onIonChange={(e) => setPassword(e.detail.value!)}></IonInput>
+            </IonItem>
 
-        <IonItem>
-          <IonLabel position="floating">Confirm Password</IonLabel>
-          <IonInput type="password" value={confirmPassword} onIonChange={(e) => setConfirmPassword(e.detail.value!)}></IonInput>
-          {confirmPassword && (
-            <IonIcon
-              icon={validatePasswordsMatch() ? checkmarkCircle : closeCircle}
-              color={validatePasswordsMatch() ? 'success' : 'danger'}
-            />
-          )}
-        </IonItem>
-        {!validatePasswordsMatch() && confirmPassword && (
-          <IonText color="danger">Passwords do not match.</IonText>
-        )}
+            <IonItem className="signup-item">
+              <IonLabel position="floating">Confirm Password</IonLabel>
+              <IonInput type="password" value={confirmPassword} onIonChange={(e) => setConfirmPassword(e.detail.value!)}></IonInput>
+              {confirmPassword && (
+                <IonIcon
+                  icon={validatePasswordsMatch() ? checkmarkCircle : closeCircle}
+                  color={validatePasswordsMatch() ? 'success' : 'danger'}
+                />
+              )}
+            </IonItem>
+            {!validatePasswordsMatch() && confirmPassword && (
+              <IonText color="danger" className="signup-error-text">Passwords do not match.</IonText>
+            )}
 
-        <IonButton expand="block" onClick={handleSignup}>Sign Up</IonButton>
+            <IonButton expand="block" className="signup-button" onClick={handleSignup}>Sign Up</IonButton>
+          </IonCardContent>
+        </IonCard>
       </IonContent>
-      <IonFooter>
+      <IonFooter className="signup-footer">
         <IonText>Contact Us: 9010203040</IonText>
         <IonText>Email: abc@gmail.com</IonText>
       </IonFooter>
@@ -139,7 +163,6 @@ const Signup: React.FC = () => {
       <IonAlert
         isOpen={showAlert}
         onDidDismiss={() => setShowAlert(false)}
-        header={'Validation Error'}
         message={alertMessage}
         buttons={['OK']}
       />

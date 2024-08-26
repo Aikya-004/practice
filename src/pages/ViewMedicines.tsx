@@ -37,7 +37,7 @@ const ViewMedicines: React.FC = () => {
   const location = useLocation();
   const pharmacyName = (location.state as RouteState)?.pharmacyName || '';
   const [items, setItems] = useState<Array<MedicineItem>>([]);
-  const [expiredItems, setExpiredItems] = useState<Array<MedicineItem>>([]);
+  // const [expiredItems, setExpiredItems] = useState<Array<MedicineItem>>([]);
   const [editItem, setEditItem] = useState<MedicineItem | undefined>();
   const [inputName, setInputName] = useState("");
   const [inputType, setInputType] = useState("");
@@ -51,33 +51,9 @@ const ViewMedicines: React.FC = () => {
 
   useEffect(() => {
     if (initialized) {
-      createExpiredItemsTable();
       loadData();
     }
   }, [initialized, pharmacyName]);
-
-  const createExpiredItemsTable = async () => {
-    try {
-      await performSQLAction(async (db: SQLiteDBConnection | undefined) => {
-        if (db) {
-          const formattedName = pharmacyName.replace(/\s+/g, '_').toLowerCase();
-          await db.query(`
-            CREATE TABLE IF NOT EXISTS expired_items_${formattedName} (
-              id INTEGER PRIMARY KEY,
-              name TEXT,
-              type TEXT,
-              quantity TEXT,
-              expiry_date TEXT,
-              batch_no TEXT,
-              price REAL
-            )
-          `);
-        }
-      });
-    } catch (error) {
-      console.error("Error creating table:", error);
-    }
-  };
 
   const loadData = async () => {
     try {
@@ -93,9 +69,6 @@ const ViewMedicines: React.FC = () => {
           const expiredItems = allItems.filter((item: MedicineItem) => item.expiry_date < currentDate);
 
           setItems(nonExpiredItems);
-          setExpiredItems(expiredItems);
-
-          await moveExpiredItems(expiredItems, db);
           await db.query(`DELETE FROM medicines_${formattedName} WHERE expiry_date < ?;`, [currentDate]);
         }
       });
@@ -105,27 +78,23 @@ const ViewMedicines: React.FC = () => {
     }
   };
 
-  const moveExpiredItems = async (expiredItems: Array<MedicineItem>, db: SQLiteDBConnection | undefined) => {
-    try {
-      const formattedName = pharmacyName.replace(/\s+/g, '_').toLowerCase();
-      for (const item of expiredItems) {
-        await db?.query(
-          `INSERT INTO expired_items_${formattedName} (id, name, type, quantity, expiry_date, batch_no, price) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-          [item.id, item.name, item.type, item.quantity, item.expiry_date, item.batch_no, item.price]
-        );
-      }
-    } catch (error) {
-      console.error("Error moving expired items:", error);
-    }
-  };
+  
 
   const updateItem = async () => {
     try {
       await performSQLAction(
         async (db: SQLiteDBConnection | undefined) => {
+          if (!db) {
+            throw new Error("Database connection is not available");
+          }
           const formattedName = pharmacyName.replace(/\s+/g, '_').toLowerCase();
-          await db?.query(
-            `UPDATE medicines_${formattedName} SET name=?, type=?, quantity=?, expiry_date=?, batch_no=?, price=? WHERE id=?`,
+  
+          // Ensure the table name is dynamically formatted
+          const tableName = `medicines_${formattedName}`;
+  
+          // Use the run method for update operations
+          await db.run(
+            `UPDATE ${tableName} SET name=?, type=?, quantity=?, expiry_date=?, batch_no=?, price=? WHERE id=?`,
             [
               inputName,
               inputType,
@@ -136,46 +105,50 @@ const ViewMedicines: React.FC = () => {
               editItem?.id,
             ]
           );
-
-          loadData(); // Reload data to refresh the list
+  
+          // Optionally, fetch and update items after the update
+          const respSelect = await db.query(`SELECT * FROM ${tableName};`);
+          setItems(respSelect?.values || []);
+        },
+        async () => {
           resetInputs();
         }
       );
     } catch (error) {
-      console.error("Error updating item:", error);
+      alert((error as Error).message);
     }
   };
+  
 
   const deleteItem = async (itemId: number) => {
     try {
-      await performSQLAction(async (db: SQLiteDBConnection | undefined) => {
-        if (db) {
-          const formattedName = pharmacyName.replace(/\s+/g, '_').toLowerCase();
-          console.log(`Attempting to delete item with ID: ${itemId}`);
-  
-          // Perform the deletion query
-          const result = await db.query(`DELETE FROM medicines_${formattedName} WHERE id=?;`, [itemId]);
-  
-          // Log the result of the query
-          console.log(`Delete result: ${JSON.stringify(result)}`);
-  
-          // Check if the deletion was successful
-          if (result && result.values) {
-            console.log(`Delete operation result: ${JSON.stringify(result)}`);
-          } else {
-            console.log(`No result or no item found with ID: ${itemId}`);
+      await performSQLAction(
+        async (db: SQLiteDBConnection | undefined) => {
+          if (!db) {
+            throw new Error("Database connection is not available");
           }
+          const formattedName = pharmacyName.replace(/\s+/g, '_').toLowerCase();
+          const tableName = `medicines_${formattedName}`;
   
-          // Reload data to refresh the list
-          await loadData();
-        } else {
-          console.error('Database connection is undefined');
+          // Use the run method for delete operations
+          await db.run(
+            `DELETE FROM ${tableName} WHERE id=?`,
+            [itemId]
+          );
+  
+          // Optionally, fetch and update items after deletion
+          const respSelect = await db.query(`SELECT * FROM ${tableName};`);
+          setItems(respSelect?.values || []);
+        },
+        async () => {
+          resetInputs();
         }
-      });
+      );
     } catch (error) {
-      console.error("Error in deleteItem function:", error);
+      alert((error as Error).message);
     }
   };
+  
 
   const confirmDelete = (itemId: number) => {
     showConfirmationAlert(
@@ -214,15 +187,14 @@ const ViewMedicines: React.FC = () => {
     setInputPrice(undefined);
   };
 
-  // Dynamic routerLink based on pharmacyName
   const formattedPharmacyName = pharmacyName.replace(/\s+/g, '_');
 
   return (
     <IonPage>
       <IonHeader className='headercls'>
-        <IonToolbar>
+       
           <IonTitle>View Medicines</IonTitle>
-        </IonToolbar>
+        
       </IonHeader>
       <IonContent fullscreen className="ion-padding">
         <IonGrid>
@@ -237,7 +209,7 @@ const ViewMedicines: React.FC = () => {
             <IonCol className='tablecol'>Edit</IonCol>
             <IonCol className='tablecol'>Delete</IonCol>
           </IonRow>
-          {items?.map((item, index) => (
+          {items.map((item, index) => (
             <IonRow key={item.id}>
               <IonCol className='tablecol'>{index + 1}</IonCol>
               <IonCol className='tablecol'>{item.name}</IonCol>
@@ -263,7 +235,7 @@ const ViewMedicines: React.FC = () => {
               <IonInput
                 type="text"
                 value={inputName}
-                onIonInput={(e) => setInputName(e.target.value as string)}
+                onIonChange={(e) => setInputName(e.detail.value as string)}
               />
             </IonItem>
             <IonItem className="itemcls">
@@ -271,7 +243,7 @@ const ViewMedicines: React.FC = () => {
               <IonInput
                 type="text"
                 value={inputType}
-                onIonInput={(e) => setInputType(e.target.value as string)}
+                onIonChange={(e) => setInputType(e.detail.value as string)}
               />
             </IonItem>
             <IonItem className="itemcls">
@@ -279,7 +251,7 @@ const ViewMedicines: React.FC = () => {
               <IonInput
                 type="text"
                 value={inputQuantity}
-                onIonInput={(e) => setInputQuantity(e.target.value as string)}
+                onIonChange={(e) => setInputQuantity(e.detail.value as string)}
               />
             </IonItem>
             <IonItem className="itemcls">
@@ -287,7 +259,7 @@ const ViewMedicines: React.FC = () => {
               <IonInput
                 type="text"
                 value={inputExpiryDate}
-                onIonInput={(e) => setInputExpiryDate(e.target.value as string)}
+                onIonChange={(e) => setInputExpiryDate(e.detail.value as string)}
               />
             </IonItem>
             <IonItem className="itemcls">
@@ -295,34 +267,27 @@ const ViewMedicines: React.FC = () => {
               <IonInput
                 type="text"
                 value={inputBatchNo}
-                onIonInput={(e) => setInputBatchNo(e.target.value as string)}
+                onIonChange={(e) => setInputBatchNo(e.detail.value as string)}
               />
             </IonItem>
             <IonItem className="itemcls">
               <IonLabel className="labelcls">Price</IonLabel>
               <IonInput
                 type="number"
-                value={inputPrice || ""}
-                onIonInput={(e) => setInputPrice(parseFloat(e.target.value as string))}
+                value={inputPrice}
+                onIonChange={(e) => setInputPrice(parseFloat(e.detail.value as string))}
               />
             </IonItem>
-            <IonButton expand="full" color="primary" onClick={updateItem}>
-              Update
-            </IonButton>
+            <IonButton expand="full" onClick={updateItem}>Update Item</IonButton>
           </>
         )}
 
-        {ConfirmationAlert}
+        <IonFooter>
+          <IonButton expand="full" color="primary" onClick={loadData}>Refresh</IonButton>
+        </IonFooter>
 
+        {ConfirmationAlert}
       </IonContent>
-      <IonFooter>
-        <IonButton
-          routerLink={`/add/medicines/${formattedPharmacyName}`}
-          expand="full"
-        >
-          Back to Medicines
-        </IonButton>
-      </IonFooter>
     </IonPage>
   );
 };

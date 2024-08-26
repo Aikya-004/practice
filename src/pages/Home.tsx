@@ -36,7 +36,7 @@ const Home: React.FC = () => {
     <IonPage>
       <IonHeader className='pgcolor'>
         <div className="hd-button">
-          <IonButton shape="round" color="light" routerLink='/Login'>Login</IonButton>
+          <IonButton shape="round"  color = "light" routerLink='/Login'>Login</IonButton>
           <IonButton shape="round" color="light" routerLink='/SignUp'>SignUp</IonButton>
         </div>
       </IonHeader>
@@ -44,22 +44,31 @@ const Home: React.FC = () => {
         <IonGrid className="custom-grid">
           <IonRow className='custom-row'>
             <IonCol className="custom-col">
-              <IonImg src="https://images.pexels.com/photos/593451/pexels-photo-593451.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" className="box-image" />
-              <IonButton className='full-link' onClick={() => handleNavigation("/add/medicines/${pharmacyName}")}>Add</IonButton>
+
+              <IonImg  onClick={() => handleNavigation("/add/medicines/${pharmacyName}")} src="https://images.pexels.com/photos/593451/pexels-photo-593451.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" className="box-image" />
+              {/* <IonButton className='full-link' onClick={() => handleNavigation("/add/medicines/${pharmacyName}")}>Add</IonButton> */}
+              <div className="overlay-text">Add</div>
+
+              
+
             </IonCol>
             <IonCol className="custom-col">
-              <IonImg src="https://images.pexels.com/photos/593451/pexels-photo-593451.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" className="box-image" />
-              <IonButton className='full-link' onClick={() => handleNavigation("/search/${pharmacyName}")}>Search</IonButton>
+              <IonImg onClick={() => handleNavigation("/search/${pharmacyName}")} src="https://images.pexels.com/photos/593451/pexels-photo-593451.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" className="box-image" />
+              <div className="overlay-text">Search</div>
+              {/* <IonButton className='full-link' onClick={() => handleNavigation("/search/${pharmacyName}")}>Search</IonButton> */}
             </IonCol>
           </IonRow>
           <IonRow className='custom-row'>
             <IonCol className="custom-col">
-              <IonImg src="https://images.pexels.com/photos/593451/pexels-photo-593451.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" className="box-image" />
-              <IonButton className='full-link' onClick={() => handleNavigation("/accounting")}>Accounting</IonButton>
+              <IonImg onClick={() => handleNavigation("/accounting")} src="https://images.pexels.com/photos/593451/pexels-photo-593451.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" className="box-image" />
+              <div className="overlay-text">Accounting</div>
+              {/* <IonButton className='full-link' onClick={() => handleNavigation("/accounting")}>Accounting</IonButton> */}
             </IonCol>
             <IonCol className="custom-col">
-              <IonImg src="https://images.pexels.com/photos/593451/pexels-photo-593451.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" className="box-image" />
-              <IonButton className='full-link' onClick={() => handleNavigation("/orders")}>Orders</IonButton>
+              
+              <IonImg onClick={() => handleNavigation("/orders")} src="https://images.pexels.com/photos/593451/pexels-photo-593451.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" className="box-image" />
+              <div className="overlay-text">Orders</div>
+              {/* <IonButton className='full-link' onClick={() => handleNavigation("/orders")}>Orders</IonButton> */}
             </IonCol>
           </IonRow>
         </IonGrid>

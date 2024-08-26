@@ -76,7 +76,7 @@ const App: React.FC = () => (
           <GeneralItems />
         </Route>
         <Route path="/view-items/:pharmacyName" component={ViewGeneralItems} />
-        <Route exact path="/add-to-cart"> {/* Define route for AddToCart */}
+        <Route exact path="/add-to-cart/:pharmacyName"> {/* Define route for AddToCart */}
           <AddToCart />
         </Route>
         <Route exact path="/">

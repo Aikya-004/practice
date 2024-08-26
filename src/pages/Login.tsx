@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   IonContent,
@@ -14,7 +14,7 @@ import {
   IonText
 } from '@ionic/react';
 import useSQLiteDB from '../composables/useSQLiteDB';
-import './Login.css'; // Import custom CSS for additional styling
+import './Login.css';
 
 const Login: React.FC = () => {
   const [emailOrPhone, setEmailOrPhone] = useState('');
@@ -23,6 +23,18 @@ const Login: React.FC = () => {
   const [toastMessage, setToastMessage] = useState('');
   const history = useHistory();
   const { validateLogin } = useSQLiteDB('');
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const storedPharmacyName = localStorage.getItem('pharmacyName');
+    if (storedPharmacyName) {
+      // If user is already logged in, redirect to HomeAfterLogin page
+      history.push({
+        pathname: '/homeafterlogin',
+        state: { pharmacyName: storedPharmacyName }
+      });
+    }
+  }, [history]);
 
   const handleLogin = async () => {
     if (!emailOrPhone || !password) {
@@ -36,7 +48,10 @@ const Login: React.FC = () => {
         emailOrPhone,
         password,
         (pharmacyName) => {
-          // On successful login, redirect to Home page with pharmacyName in state
+          // On successful login, store the pharmacy name in local storage
+          localStorage.setItem('pharmacyName', pharmacyName);
+
+          // Redirect to HomeAfterLogin page
           history.push({
             pathname: '/homeafterlogin',
             state: { pharmacyName }

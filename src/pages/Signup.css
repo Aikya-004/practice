@@ -1,35 +1,137 @@
+/* Overall page styling */
+.signup-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f7f9fc; /* Light background color */
+}
+
+/* Header styling */
+.signup-header {
+  --background: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Content styling */
 .signup-content {
-    --background: #f0f4f8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  padding: 10px;
+}
+
+/* Card styling */
+.signup-card {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff; /* Card background color */
+  padding: 20px;
+  border: 2px solid pink; /* Increased card border */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 auto; /* Center card horizontally */
+}
+
+/* Item styling */
+.signup-item {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* Label styling */
+.signup-label {
+  color: black; /* Dark color for labels */
+}
+
+/* Input styling */
+.signup-input {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  background-color: #e0f7fa; /* Pale blue background for inputs */
+  border-radius: 6px;
+}
+
+/* Icon styling */
+.signup-icon {
+  font-size: 20px;
+  margin-left: 8px;
+}
+
+/* Button styling */
+.signup-button {
+  --background: pink; /* Primary button color */
+  --background-focused: pink;
+  --background-hover: pink; /* Hover color */
+  --background-activated: pink; /* Activated color */
+  --color: #ffffff; /* Text color for button */
+  border-radius: 6px;
+  margin-top: 20px;
+}
+
+/* Footer styling */
+.signup-footer {
+  text-align: center;
+  padding: 15px;
+  background-color: #ffffff;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Error text styling */
+.signup-error-text {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+/* Responsive styling for different devices */
+@media (max-width: 1024px) {
+  /* Tablets and small desktops */
+  .signup-card {
+    width: 90%;
     padding: 20px;
   }
-  
-  ion-item {
-    --background: #fff;
-    --color-focused: #ff69b4; /* Pink color for focused input */
-    --border-color: #1e90ff; /* Blue color for border */
-    margin-bottom: 15px;
-    --padding-start: 16px;
-    --padding-end: 16px;
+}
+
+@media (max-width: 768px) {
+  /* Tablets */
+  .signup-card {
+    width: 90%;
+    padding: 15px;
   }
-  
-  ion-label {
-    --color-focused: #ff69b4; /* Pink color for focused label */
-    --padding-start: 16px;
+
+  .signup-item {
+    margin-bottom: 12px;
   }
-  
-  ion-input {
-    --padding-start: 16px;
+}
+
+@media (max-width: 600px) {
+  /* Mobile phones */
+  .signup-card {
+    width: 95%;
+    padding: 15px;
   }
-  
-  ion-button {
-    --background: #ff69b4; /* Pink background for button */
-    --background-focused: #ff69b4;
-    --background-hover: #ff69b4;
-    --background-activated: #ff69b4;
+
+  .signup-item {
+    margin-bottom: 10px;
   }
-  
-  ion-footer {
-    text-align: center;
+}
+
+@media (max-width: 400px) {
+  /* Extra small devices */
+  .signup-card {
+    width: 100%;
     padding: 10px;
   }
-  
+
+  .signup-item {
+    margin-bottom: 8px;
+  }
+
+  .signup-button {
+    width: 100%;
+  }
+}

@@ -34,13 +34,13 @@ const Search: React.FC = () => {
   const history = useHistory();
   const state = location.state as RouteState | undefined;
   const pharmacyName = state?.pharmacyName || '';
-  
+
   const { performSQLAction } = useSQLiteDB(pharmacyName);
 
   const navigateTo = (path: string) => {
     history.push({
       pathname: path,
-      state: { pharmacyName }
+      state: { pharmacyName },
     });
   };
 
@@ -58,12 +58,12 @@ const Search: React.FC = () => {
     };
 
     const inputElement = inputRef.current?.getInputElement();
-    inputElement?.then(element => {
+    inputElement?.then((element) => {
       element?.addEventListener("keydown", handleKeyPress);
     });
 
     return () => {
-      inputElement?.then(element => {
+      inputElement?.then((element) => {
         element?.removeEventListener("keydown", handleKeyPress);
       });
     };
@@ -71,9 +71,11 @@ const Search: React.FC = () => {
 
   const fetchAllItems = async () => {
     await performSQLAction(async (db) => {
-      const query = `SELECT * FROM ${searchType}_${pharmacyName}`;
-      const results = await db?.query(query);
-      setSearchResults(results?.values ?? []);
+      if (db) {
+        const query = `SELECT * FROM ${searchType}_${pharmacyName};`;
+        const results = await db.query(query);
+        setSearchResults(results?.values ?? []);
+      }
     });
   };
 
@@ -85,17 +87,19 @@ const Search: React.FC = () => {
     }
 
     await performSQLAction(async (db) => {
-      const query = `SELECT * FROM ${searchType}_${pharmacyName} WHERE name LIKE ?`;
-      const results = await db?.query(query, [`%${searchText}%`]);
-      const items = results?.values ?? [];
+      if (db) {
+        const query = `SELECT * FROM ${searchType}_${pharmacyName} WHERE name LIKE ?;`;
+        const results = await db.query(query, [`%${searchText}%`]);
+        const items = results?.values ?? [];
 
-      if (items.length === 0) {
-        setToastMessage("No results found.");
-        setShowToast(true);
+        if (items.length === 0) {
+          setToastMessage("No results found.");
+          setShowToast(true);
+        }
+
+        setSearchResults(items);
+        setSuggestions([]);
       }
-
-      setSearchResults(items);
-      setSuggestions([]);
     });
   };
 
@@ -106,10 +110,12 @@ const Search: React.FC = () => {
     }
 
     await performSQLAction(async (db) => {
-      const query = `SELECT name FROM ${searchType}_${pharmacyName} WHERE name LIKE ? LIMIT 5`;
-      const results = await db?.query(query, [`${text}%`]);
-      const items = results?.values ?? [];
-      setSuggestions(items);
+      if (db) {
+        const query = `SELECT name FROM ${searchType}_${pharmacyName} WHERE name LIKE ? LIMIT 5;`;
+        const results = await db.query(query, [`${text}%`]);
+        const items = results?.values ?? [];
+        setSuggestions(items);
+      }
     });
   };
 
@@ -124,15 +130,20 @@ const Search: React.FC = () => {
     const newQuantity = item.quantity - quantity;
 
     await performSQLAction(async (db) => {
-      await db?.query(`UPDATE ${searchType}_${pharmacyName} SET quantity = ? WHERE id = ?`, [newQuantity, item.id]);
+      if (db) {
+        await db.query(
+          `UPDATE ${searchType}_${pharmacyName} SET quantity = ? WHERE id = ?;`,
+          [newQuantity, item.id]
+        );
+      }
     });
 
-    let cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-    
-    cartItems.push(newItem);
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
-    
+    let cartItems = JSON.parse(localStorage.getItem(`cartItems_${pharmacyName}`) || "[]");
 
+    newItem.type = searchType;
+    cartItems.push(newItem);
+    localStorage.setItem(`cartItems_${pharmacyName}`, JSON.stringify(cartItems));
+    console.log(cartItems);
     setToastMessage("Item added to cart.");
     setShowToast(true);
 
@@ -140,23 +151,26 @@ const Search: React.FC = () => {
 
     const inputElement = document.getElementById(`quantity-${item.id}`) as HTMLInputElement;
     if (inputElement) {
-      inputElement.value = '';
+      inputElement.value = "";
     }
   };
 
   const goToCart = () => {
-    navigateTo('/add-to-cart');
+    const path = `/add-to-cart/${pharmacyName.replace(/\s+/g, "_")}`;
+    navigateTo(path);
   };
 
   return (
     <IonPage>
-      <IonHeader className='pgcolor'>
+      <IonHeader className="pgcolor">
         <div className="hd-button">
           <IonTitle>Search</IonTitle>
-          <IonButton shape="round" color="light" onClick={goToCart}>Cart</IonButton>
+          <IonButton shape="round" color="light" onClick={goToCart}>
+            Cart
+          </IonButton>
         </div>
       </IonHeader>
-      
+
       <IonContent fullscreen className="ion-padding">
         <IonItem className="itemcls">
           <IonLabel className="labelcls">Type</IonLabel>
@@ -181,7 +195,9 @@ const Search: React.FC = () => {
               }}
               ref={inputRef}
             />
-            <IonButton color="light" onClick={searchItems}>Search</IonButton>
+            <IonButton color="light" onClick={searchItems}>
+              Search
+            </IonButton>
           </IonItem>
         </div>
         {suggestions.length > 0 && (
@@ -190,11 +206,14 @@ const Search: React.FC = () => {
               <IonLabel>Searching for...</IonLabel>
             </IonListHeader>
             {suggestions.map((suggestion, index) => (
-              <IonItem key={index} onClick={() => {
-                setSearchText(suggestion.name);
-                setSuggestions([]);
-                searchItems();
-              }}>
+              <IonItem
+                key={index}
+                onClick={() => {
+                  setSearchText(suggestion.name);
+                  setSuggestions([]);
+                  searchItems();
+                }}
+              >
                 <IonLabel>{suggestion.name}</IonLabel>
               </IonItem>
             ))}
@@ -202,26 +221,53 @@ const Search: React.FC = () => {
         )}
         <div className="listcls">
           {searchResults.map((item) => (
-            <div key={item.id} className="itemcls" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div
+              key={item.id}
+              className="itemcls"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
               <div>
-                <p><strong>Name:</strong> {item.name}</p>
-                <p><strong>Type:</strong> {searchType}</p>
-                <p><strong>Quantity:</strong> {item.quantity}</p>
-                <p><strong>Expiry Date:</strong> {item.expiry_date}</p>
-                <p><strong>Batch No:</strong> {item.batch_no}</p>
-                <p><strong>Price:</strong> Rs. {item.price}</p>
+                <p>
+                  <strong>Name:</strong> {item.name}
+                </p>
+                <p>
+                  <strong>Type:</strong> {searchType}
+                </p>
+                <p>
+                  <strong>Quantity:</strong> {item.quantity}
+                </p>
+                <p>
+                  <strong>Expiry Date:</strong> {item.expiry_date}
+                </p>
+                <p>
+                  <strong>Batch No:</strong> {item.batch_no}
+                </p>
+                <p>
+                  <strong>Price:</strong> Rs. {item.price}
+                </p>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ display: "flex", alignItems: "center" }}>
                 <IonInput
                   type="number"
                   placeholder="Quantity"
                   id={`quantity-${item.id}`}
                 />
-                <IonButton color="light" onClick={() => {
-                  const inputElement = document.getElementById(`quantity-${item.id}`) as HTMLInputElement;
-                  const quantity = parseInt(inputElement.value);
-                  addToCart(item, quantity);
-                }}>Add to Cart</IonButton>
+                <IonButton
+                  color="light"
+                  onClick={() => {
+                    const inputElement = document.getElementById(
+                      `quantity-${item.id}`
+                    ) as HTMLInputElement;
+                    const quantity = parseInt(inputElement.value, 10);
+                    addToCart(item, quantity);
+                  }}
+                >
+                  Add to Cart
+                </IonButton>
               </div>
             </div>
           ))}
