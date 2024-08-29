@@ -7,7 +7,7 @@ import GeneralItems from './pages/GeneralItems'; // Import GeneralItems componen
 import Add from './pages/Add'; // Import Add component
 import AddToCart from './pages/AddToCart'; // Import AddToCart component
 import ViewGeneralItems from './pages/ViewGeneralItems';
-
+import Orderspage from './pages/orders';
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
 
@@ -43,6 +43,7 @@ import Search from './pages/Search';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Homeafterlogin from './pages/Homeafterlogin'
+import OrdersPage from './pages/orders';
 setupIonicReact();
 
 const App: React.FC = () => (
@@ -78,6 +79,9 @@ const App: React.FC = () => (
         <Route path="/view-items/:pharmacyName" component={ViewGeneralItems} />
         <Route exact path="/add-to-cart/:pharmacyName"> {/* Define route for AddToCart */}
           <AddToCart />
+        </Route>
+        <Route exact path="/Orders/:pharmacyName"> {/* Define route for AddToCart */}
+          <Orderspage />
         </Route>
         <Route exact path="/">
           <Redirect to="/home" /> {/* Change to redirect to /home */}

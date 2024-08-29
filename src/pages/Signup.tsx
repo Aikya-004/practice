@@ -35,7 +35,7 @@ const Signup: React.FC = () => {
   const history = useHistory();
   const { registerUser, initialized } = useSQLiteDB(pharmacyName);
 
-  const pharmacyNameRegex = /^[a-z]*$/;
+  const pharmacyNameRegex = /[A-Z|a-z][a-z]*$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneNumberRegex = /^\d{10}$/;
 

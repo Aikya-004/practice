@@ -1,3 +1,4 @@
+
 import {
   IonHeader,
   IonPage,
@@ -14,7 +15,6 @@ import {
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import jsPDF from "jspdf";
-import 'jspdf-autotable';
 import './AddToCart.css';
 
 interface RouteState {
@@ -43,6 +43,7 @@ const AddToCart: React.FC = () => {
     const fetchCartItems = () => {
       if (pharmacyName) {
         const storedCartItems = localStorage.getItem(`cartItems_${pharmacyName}`);
+        
         if (storedCartItems) {
           try {
             const parsedItems = JSON.parse(storedCartItems);
@@ -82,86 +83,118 @@ const AddToCart: React.FC = () => {
   const generalItemsTotalWithDiscount = calculateTotal(cartItemsByType("general_items"), true);
 
   const handleSave = () => {
-    const doc = generatePDF();
-    doc.save("receipt.pdf");
-    setToastMessage("Saved successfully.");
+    const key=`cartItems_${pharmacyName}`
+    const orderCode = `ORD-${Date.now()}`; // Create a unique order code
+    const order = {
+      orderCode,
+      patientName,
+      doctorName,
+      pharmacyName,
+      gstNo,
+      gstRate,
+      date: new Date().toLocaleDateString(),
+      items: cartItems,
+      total: medicinesTotalWithDiscount + (medicinesTotalWithDiscount * gstRate / 100) + generalItemsTotalWithDiscount + (generalItemsTotalWithDiscount * gstRate / 100),
+    };
+
+    // Fetch existing orders from local storage
+    const storedOrders = JSON.parse(localStorage.getItem(`orders_${pharmacyName}`) || '[]');
+    
+    // Add the new order to the stored orders
+    storedOrders.push(order);
+    
+    // Save back to local storage
+    localStorage.setItem(`orders_${pharmacyName}`, JSON.stringify(storedOrders));
+    console.log(storedOrders)
+    setToastMessage("Order saved successfully.");
+    localStorage.removeItem(key);
     setShowToast(true);
   };
 
-  // Generate PDF function with correct usage of autoTable and lastAutoTable
 const generatePDF = () => {
   const doc = new jsPDF();
 
-  // Add header
-  doc.setFontSize(16);
-  doc.text('Receipt', 14, 20);
-  
   doc.setFontSize(12);
-  doc.text(`Pharmacy Name: ${pharmacyName}`, 14, 30);
-  doc.text(`Dr. Name: ${doctorName}`, 14, 40);
-  doc.text(`Patient Name: ${patientName}`, 14, 50);
-  doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 60);
-  doc.text(`GST No: ${gstNo}`, 14, 70);
+  doc.setFont('Helvetica', 'normal');
 
-  // Add Medicines Table
-  doc.setFontSize(14);
-  doc.text('Medicines', 14, 85);
+  // Header
+  doc.text(`Pharmacy Name: ${pharmacyName}`, 10, 10);
+  doc.text(`Dr. Name: ${doctorName}`, 10, 20);
+  doc.text(`Patient Name: ${patientName}`, 10, 30);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 10, 40);
+  doc.text(`GST No: ${gstNo}`, 10, 50);
+  doc.text('----------------------------------------', 10, 60);
 
-  doc.autoTable({
-    startY: 90,
-    head: [['S.No', 'Name', 'Quantity', 'Batch No', 'Price', 'Discount (%)']],
-    body: cartItemsByType("medicines").map((item, index) => [
-      index + 1,
-      item.name,
-      item.quantity,
-      item.batch_no,
-      `${item.price} ₹`,
-      `${item.discount}%`
-    ]),
-    theme: 'striped',
-    headStyles: { fillColor: [0, 0, 255], textColor: [255, 255, 255] },
-    styles: { fontSize: 10 },
-    margin: { top: 20 },
+  // Medicines Table
+  let y = 70;
+  doc.setFontSize(10);
+  doc.text('Medicines', 10, y);
+  y += 10;
+  
+  // Header Row
+  doc.text('S.No', 10, y);
+  doc.text('Name', 30, y);
+  doc.text('Quantity', 80, y);
+  doc.text('Batch No', 110, y);
+  doc.text('Price', 140, y);
+  doc.text('Discount', 170, y);
+  y += 10;
+
+  // Item Rows
+  cartItemsByType("medicines").forEach((item, index) => {
+    doc.text(`${index + 1}`, 10, y);
+    doc.text(item.name, 30, y);
+    doc.text(`${item.quantity}`, 80, y);
+    doc.text(item.batch_no, 110, y);
+    doc.text(`${item.price} ₹`, 140, y);
+    doc.text(`${item.discount}%`, 170, y);
+    y += 10;
   });
 
-  // The correct way to access lastAutoTable
-  let y = doc.autoTable.previous.finalY + 10;
-  doc.text(`Total: ${medicinesTotalWithDiscount} ₹`, 14, y);
+  // Medicines Total
+  doc.text('----------------------------------------', 10, y);
   y += 10;
-  doc.text(`GST: ${gstRate} %`, 14, y);
+  doc.text(`Total: ${medicinesTotalWithDiscount} ₹`, 10, y);
   y += 10;
-  doc.text(`Final Total: ${medicinesTotalWithDiscount + (medicinesTotalWithDiscount * gstRate / 100)} ₹`, 14, y);
+  doc.text(`GST: ${gstRate} %`, 10, y);
+  y += 10;
+  doc.text(`Final Total: ${medicinesTotalWithDiscount + (medicinesTotalWithDiscount * gstRate / 100)} ₹`, 10, y);
 
-  // Add General Items Table
+  // General Items Table
   y += 20;
-  doc.setFontSize(14);
-  doc.text('General Items', 14, y);
+  doc.text('General Items', 10, y);
+  y += 10;
 
-  doc.autoTable({
-    startY: y + 10,
-    head: [['S.No', 'Name', 'Quantity', 'Price', 'Discount (%)']],
-    body: cartItemsByType("general_items").map((item, index) => [
-      index + 1,
-      item.name,
-      item.quantity,
-      `${item.price} ₹`,
-      `${item.discount}%`
-    ]),
-    theme: 'striped',
-    headStyles: { fillColor: [0, 150, 0], textColor: [255, 255, 255] },
-    styles: { fontSize: 10 },
-    margin: { top: 20 },
+  // Header Row
+  doc.text('S.No', 10, y);
+  doc.text('Name', 30, y);
+  doc.text('Quantity', 80, y);
+  doc.text('Price', 110, y);
+  doc.text('Discount', 140, y);
+  y += 10;
+
+  // Item Rows
+  cartItemsByType("general_items").forEach((item, index) => {
+    doc.text(`${index + 1}`, 10, y);
+    doc.text(item.name, 30, y);
+    doc.text(`${item.quantity}`, 80, y);
+    doc.text(`${item.price} ₹`, 110, y);
+    doc.text(`${item.discount}%`, 140, y);
+    y += 10;
   });
 
-  y = doc.autoTable.previous.finalY + 10;
-  doc.text(`Total: ${generalItemsTotalWithDiscount} ₹`, 14, y);
+  // General Items Total
+  doc.text('----------------------------------------', 10, y);
   y += 10;
-  doc.text(`GST: ${gstRate} %`, 14, y);
+  doc.text(`Total: ${generalItemsTotalWithDiscount} ₹`, 10, y);
   y += 10;
-  doc.text(`Grand Total: ${generalItemsTotalWithDiscount + (generalItemsTotalWithDiscount * gstRate / 100) + medicinesTotalWithDiscount + (medicinesTotalWithDiscount * gstRate / 100)} ₹`, 14, y);
+  doc.text(`GST: ${gstRate} %`, 10, y);
+  y += 10;
+  doc.text(`Grand Total: ${generalItemsTotalWithDiscount + (generalItemsTotalWithDiscount * gstRate / 100) + medicinesTotalWithDiscount + (medicinesTotalWithDiscount * gstRate / 100)} ₹`, 10, y);
 
   return doc;
 };
+
 
   const handlePrint = () => {
     const doc = generatePDF();
@@ -176,22 +209,23 @@ const generatePDF = () => {
     dataTransfer.items.add(new File([pdfBlob], 'receipt.pdf', { type: 'application/pdf' }));
 
     if (navigator.share) {
-      navigator.share({
-        title: 'Receipt',
-        files: dataTransfer.files
-      }).then(() => {
-        setToastMessage("Shared successfully.");
-        setShowToast(true);
-      }).catch((error) => {
-        console.error("Error sharing:", error);
-        setToastMessage("Sharing failed.");
-        setShowToast(true);
-      });
+        navigator.share({
+            title: 'Receipt',
+            files: dataTransfer.files
+        }).then(() => {
+            setToastMessage("Shared successfully.");
+            setShowToast(true);
+        }).catch((error) => {
+            console.error("Error sharing:", error);
+            setToastMessage("Sharing failed.");
+            setShowToast(true);
+        });
     } else {
-      setToastMessage("Web Share API not supported.");
-      setShowToast(true);
+        setToastMessage("Web Share API not supported.");
+        setShowToast(true);
     }
-  };
+};
+
 
   const handleRemove = (index: number) => {
     const updatedCartItems = cartItems.filter((_, i) => i !== index);
@@ -225,40 +259,108 @@ const generatePDF = () => {
           <IonLabel className="labelcls">GST No:</IonLabel>
           <IonInput value={gstNo} onIonChange={(e) => setGstNo(e.detail.value as string)} />
         </IonItem>
-        <IonItem className="itemcls">
-          <IonLabel className="labelcls">GST Rate:</IonLabel>
-          <IonInput type="number" value={gstRate} onIonChange={(e) => setGstRate(Number(e.detail.value))} />
-        </IonItem>
-        <IonItem className="itemcls">
-          <IonLabel className="labelcls">Medicines:</IonLabel>
-        </IonItem>
-        {cartItemsByType("medicines").map((item, index) => (
-          <IonItem key={index}>
-            <IonLabel>{item.name} - {item.quantity} - {item.price} ₹ - {item.discount}%</IonLabel>
-            <IonButton onClick={() => handleRemove(index)}>Remove</IonButton>
-          </IonItem>
-        ))}
-        <IonItem className="itemcls">
-          <IonLabel className="labelcls">General Items:</IonLabel>
-        </IonItem>
-        {cartItemsByType("general_items").map((item, index) => (
-          <IonItem key={index}>
-            <IonLabel>{item.name} - {item.quantity} - {item.price} ₹ - {item.discount}%</IonLabel>
-            <IonButton onClick={() => handleRemove(index)}>Remove</IonButton>
-          </IonItem>
-        ))}
+
+        <div className="items-section">
+          <div className="section-header">
+            <IonLabel className="labelcls">Medicines</IonLabel>
+          </div>
+          <div className="header-row">
+            <div className="header-cell">S.No</div>
+            <div className="header-cell">Name</div>
+            <div className="header-cell">Quantity</div>
+            <div className="header-cell">Batch No</div>
+            <div className="header-cell">Price</div>
+            <div className="header-cell">Discount (%) / Price</div>
+          </div>
+
+          {cartItemsByType("medicines").length === 0 ? (
+            <div className="no-items">
+              <IonLabel className="labelcls">No items found</IonLabel>
+            </div>
+          ) : (
+            <div className="items-list">
+              {cartItemsByType("medicines").map((item, index) => (
+                <div key={index} className="item-row">
+                  <div className="item-cell">
+                    {index + 1}
+                    <IonButton
+                      className="remove-button"
+                      color="danger"
+                      onClick={() => handleRemove(index)}
+                    >
+                      Remove
+                    </IonButton>
+                  </div>
+                  <div className="item-cell">{item.name}</div>
+                  <div className="item-cell">{item.quantity}</div>
+                  <div className="item-cell">{item.batch_no}</div>
+                  <div className="item-cell">{item.price} ₹</div>
+                  <div className="item-cell">{item.discount}%</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="items-section">
+          <div className="section-header">
+            <IonLabel className="labelcls">General Items</IonLabel>
+          </div>
+          <div className="header-row">
+            <div className="header-cell">S.No</div>
+            <div className="header-cell">Name</div>
+            <div className="header-cell">Quantity</div>
+            <div className="header-cell">Price</div>
+            <div className="header-cell">Discount (%) / Price</div>
+          </div>
+
+          {cartItemsByType("general_items").length === 0 ? (
+            <div className="no-items">
+              <IonLabel className="labelcls">No items found</IonLabel>
+            </div>
+          ) : (
+            <div className="items-list">
+              {cartItemsByType("general_items").map((item, index) => (
+                <div key={index} className="item-row">
+                  <div className="item-cell">
+                    {index + 1}
+                    <IonButton
+                      className="remove-button"
+                      color="danger"
+                      onClick={() => handleRemove(index)}
+                    >
+                      Remove
+                    </IonButton>
+                  </div>
+                  <div className="item-cell">{item.name}</div>
+                  <div className="item-cell">{item.quantity}</div>
+                  <div className="item-cell">{item.price} ₹</div>
+                  <div className="item-cell">{item.discount}%</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <IonFooter>
-          <IonButton expand="full" onClick={handleSave}>Save</IonButton>
-          <IonButton expand="full" onClick={handlePrint}>Print</IonButton>
-          <IonButton expand="full" onClick={handleShare}>Share</IonButton>
+          <IonButton expand="full" onClick={handleSave}>
+            Save
+          </IonButton>
+          <IonButton expand="full" onClick={handlePrint}>
+            Print
+          </IonButton>
+          <IonButton expand="full" onClick={handleShare}>
+            Share
+          </IonButton>
         </IonFooter>
+
+        <IonToast
+          isOpen={showToast}
+          onDidDismiss={() => setShowToast(false)}
+          message={toastMessage}
+          duration={2000}
+        />
       </IonContent>
-      <IonToast
-        isOpen={showToast}
-        message={toastMessage}
-        duration={2000}
-        onDidDismiss={() => setShowToast(false)}
-      />
     </IonPage>
   );
 };

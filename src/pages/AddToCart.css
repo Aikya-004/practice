@@ -1,85 +1,112 @@
+/* General styles for the header, sections, and footer */
 .headercls {
-    text-align: center;
-    background-color: #f8f9fa;
+    background-color: #f0f0f0;
     padding: 10px;
-    border-bottom: 1px solid #ddd;
-}
-
-.itemcls {
-    margin-bottom: 10px;
-}
-
-.labelcls {
+    border-bottom: 2px solid #007bff; /* Thicker line */
+  }
+  
+  .section-header {
+    margin-top: 20px;
     font-weight: bold;
-    font-size: 1.1em;
-}
-
-.date-text {
-    font-size: 1em;
-    padding: 8px 0;
-}
-
-.items-section {
+    text-align: center;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .items-section {
+    margin-top: 20px;
+    border-top: 2px solid #007bff; /* Thicker top border */
+    padding: 10px;
+  }
+  
+  .item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #ddd; /* Thicker bottom line */
+    padding: 10px 0;
+  }
+  
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    background-color: #e0e0e0;
+    padding: 10px;
+    border-bottom: 2px solid #007bff; /* Thicker separator line */
+    font-weight: bold;
+  }
+  
+  .item-cell {
+    flex: 1;
+    text-align: center;
+    padding: 5px;
+  }
+  
+  .labelcls {
+    font-weight: bold;
+    font-size: 16px;
+  }
+  
+  .no-items {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+  }
+  
+  /* Style for input fields */
+  .itemcls {
+    margin: 10px 0;
+  }
+  
+  .date-text {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  /* Styles for the Remove button */
+  .remove-button {
+    margin-top: 5px;
+    font-size: 12px;
+    background-color: #ff4d4d;
+    color: #fff;
+    border-radius: 4px;
+    padding: 5px 10px;
+  }
+  
+  /* Ensure the main details line up in a single row */
+  .single-line {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 2px solid #007bff; /* Thicker line */
+    padding: 10px;
+  }
+  
+  .item-row > .item-cell {
+    padding: 5px 0;
+  }
+  
+  .footercls {
     margin-top: 20px;
     padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #fff;
-}
-
-.section-header {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.header-row,
-.item-row {
     display: flex;
-    align-items: center;
-    padding: 5px 0;
-}
-
-.header-cell,
-.item-cell {
-    flex: 1;
-    padding: 0 5px;
-    text-align: left;
-}
-
-.header-cell {
-    font-weight: bold;
-}
-
-.no-items {
-    text-align: center;
-    margin: 10px 0;
-    color: #777;
-}
-
-.total-row {
-    font-weight: bold;
-    padding: 10px 0;
-    border-top: 1px solid #ddd;
-}
-
-.total-amount {
-    font-size: 1.2em;
-    color: #007bff;
-}
-
-.footer-buttons {
+    gap: 10px;
+  }
+  
+  /* Additional styling to highlight important sections */
+  .item-row:hover {
+    background-color: #f5f5f5;
+  }
+  
+  /* Button styles in the footer */
+  ion-footer {
     display: flex;
     justify-content: space-around;
-    padding: 10px 0;
-}
-
-.buttoncls {
-    flex: 1;
-    margin: 0 5px;
-}
-
-.remove-button {
-    margin-left: 10px;
-    font-size: 0.8em;
-}
+    padding: 10px;
+  }
+  
+  ion-button {
+    margin: 5px;
+    font-size: 14px;
+    border-radius: 4px;
+  }
+  
