@@ -66,7 +66,7 @@ const Home: React.FC = () => {
             </IonCol>
             <IonCol className="custom-col">
               
-              <IonImg onClick={() => handleNavigation("/orders")} src="https://images.pexels.com/photos/593451/pexels-photo-593451.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" className="box-image" />
+              <IonImg onClick={() => handleNavigation("/Orders/${pharmacyName}")} src="https://images.pexels.com/photos/593451/pexels-photo-593451.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" className="box-image" />
               <div className="overlay-text">Orders</div>
               {/* <IonButton className='full-link' onClick={() => handleNavigation("/orders")}>Orders</IonButton> */}
             </IonCol>

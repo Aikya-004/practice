@@ -1,0 +1,22 @@
+/* orders.css */
+
+.order-item {
+  margin-bottom: 16px;
+}
+
+.order-item table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.order-item th,
+.order-item td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.order-item th {
+  background-color: #f4f4f4;
+}
