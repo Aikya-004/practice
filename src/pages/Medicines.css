@@ -1,4 +1,4 @@
-.headercls{
+/* .headercls{
     color:black;
     height: 13%;
     display: flex;
@@ -9,6 +9,22 @@
     font-size:xx-large;
     box-shadow: 100px 100px 1000px lightskyblue;
     border: 2px solid lightskyblue;
+
+} */
+.headerclass{
+   color:black;
+  height: 13%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  background-color:pink;
+  font-size:xx-large;
+  text-align: center;
+  /* box-shadow: 100px 100px 1000px lightskyblue; */
+  box-shadow: 0px 10px 15px lightskyblue;
+  border: 3px solid lightskyblue;
+
 }
 .form-buttons ,.form-button2{
     background-color: white;
@@ -67,4 +83,3 @@
    color: red;
    font-weight: bold;
  }
- 

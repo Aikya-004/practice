@@ -70,10 +70,10 @@ const Login: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
+      <IonHeader className='headerclass'>
+        
           <IonTitle>Login</IonTitle>
-        </IonToolbar>
+        
       </IonHeader>
       <IonContent className="ion-padding">
         <div className="login-container">

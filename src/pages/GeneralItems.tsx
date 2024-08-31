@@ -139,10 +139,10 @@ const General: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
+      <IonHeader className="headerclass">
+        
           <IonTitle>Add General Items</IonTitle>
-        </IonToolbar>
+        
       </IonHeader>
       <IonContent className="ion-padding">
         <div className="form-container">
@@ -194,7 +194,7 @@ const General: React.FC = () => {
           />
         </div>
       </IonContent>
-      <IonFooter>
+      <IonFooter className="footer">
         <IonText>Contact Us : 9010203040</IonText>
         <IonText>Email : abc@gmail.com</IonText>
       </IonFooter>

@@ -38,14 +38,22 @@ const Signup: React.FC = () => {
   const pharmacyNameRegex = /[A-Z|a-z][a-z]*$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneNumberRegex = /^\d{10}$/;
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_])[A-Za-z\d@$!%*?&_]{8,}$/;
 
   const validatePharmacyName = () => pharmacyNameRegex.test(pharmacyName);
   const validateEmail = () => emailRegex.test(email);
   const validatePhoneNumber = () => phoneNumberRegex.test(phoneNumber);
+  const validatePassword = () => passwordRegex.test(password);
   const validatePasswordsMatch = () => password === confirmPassword;
 
   const handleSignup = () => {
-    if (!validatePharmacyName() || !validateEmail() || !validatePhoneNumber() || !validatePasswordsMatch()) {
+    if (
+      !validatePharmacyName() ||
+      !validateEmail() ||
+      !validatePhoneNumber() ||
+      !validatePassword() ||
+      !validatePasswordsMatch()
+    ) {
       setAlertMessage('Please correct the errors in the form before submitting.');
       setShowAlert(true);
       return;
@@ -61,16 +69,10 @@ const Signup: React.FC = () => {
       setAlertMessage('Signup successful!');
       setShowAlert(true);
       // Redirect to homeafterlogin page after successful signup
-
-
-      
-        // On successful login, redirect to Home page with pharmacyName in state
-        history.push({
-          pathname: '/homeafterlogin',
-          state: { pharmacyName }
-        });
-     
-
+      history.push({
+        pathname: '/homeafterlogin',
+        state: { pharmacyName },
+      });
     }, (error) => {
       setAlertMessage(error.message);
       setShowAlert(true);
@@ -79,11 +81,12 @@ const Signup: React.FC = () => {
 
   return (
     <IonPage className="signup-page">
-      <IonHeader className="signup-header">
-        <IonToolbar>
-          <IonTitle>Welcome User</IonTitle>
-        </IonToolbar>
+      <IonHeader className="headerclass">
+       
+          Welcome User
+        
       </IonHeader>
+     
       <IonContent className="signup-content">
         <IonCard className="signup-card">
           <IonCardHeader>
@@ -135,7 +138,18 @@ const Signup: React.FC = () => {
             <IonItem className="signup-item">
               <IonLabel position="floating">Password</IonLabel>
               <IonInput type="password" value={password} onIonChange={(e) => setPassword(e.detail.value!)}></IonInput>
+              {password && (
+                <IonIcon
+                  icon={validatePassword() ? checkmarkCircle : closeCircle}
+                  color={validatePassword() ? 'success' : 'danger'}
+                />
+              )}
             </IonItem>
+            {!validatePassword() && password && (
+              <IonText color="danger" className="signup-error-text">
+                Password must be at least 8 characters long, contain uppercase and lowercase letters, a number, and a special character.
+              </IonText>
+            )}
 
             <IonItem className="signup-item">
               <IonLabel position="floating">Confirm Password</IonLabel>
@@ -155,10 +169,7 @@ const Signup: React.FC = () => {
           </IonCardContent>
         </IonCard>
       </IonContent>
-      <IonFooter className="signup-footer">
-        <IonText>Contact Us: 9010203040</IonText>
-        <IonText>Email: abc@gmail.com</IonText>
-      </IonFooter>
+      
 
       <IonAlert
         isOpen={showAlert}

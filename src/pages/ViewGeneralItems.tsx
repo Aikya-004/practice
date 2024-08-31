@@ -38,7 +38,7 @@ const ViewGeneralItems: React.FC = () => {
   const pharmacyName = (location.state as RouteState)?.pharmacyName || '';
   console.log(pharmacyName);
   const [items, setItems] = useState<Array<GeneralItem>>([]);
-  const [expiredItems, setExpiredItems] = useState<Array<GeneralItem>>([]);
+  // const [expiredItems, setExpiredItems] = useState<Array<GeneralItem>>([]);
   const [editItem, setEditItem] = useState<GeneralItem | undefined>();
   const [inputName, setInputName] = useState("");
   const [inputQuantity, setInputQuantity] = useState("");
@@ -51,32 +51,11 @@ const ViewGeneralItems: React.FC = () => {
 
   useEffect(() => {
     if (initialized) {
-      createExpiredItemsTable();
+      // createExpiredItemsTable();
       loadData();
     }
   }, [initialized, pharmacyName]);
 
-  const createExpiredItemsTable = async () => {
-    try {
-      await performSQLAction(async (db: SQLiteDBConnection | undefined) => {
-        if (db) {
-          const formattedName = pharmacyName.replace(/\s+/g, '_').toLowerCase();
-          await db.query(`
-            CREATE TABLE IF NOT EXISTS expired_general_items_${formattedName} (
-              id INTEGER PRIMARY KEY,
-              name TEXT,
-              quantity TEXT,
-              expiry_date TEXT,
-              batch_no TEXT,
-              price REAL
-            )
-          `);
-        }
-      });
-    } catch (error) {
-      alert((error as Error).message);
-    }
-  };
 
   const loadData = async () => {
     try {
@@ -92,9 +71,9 @@ const ViewGeneralItems: React.FC = () => {
           const expiredItems = allItems.filter((item: GeneralItem) => item.expiry_date < currentDate);
 
           setItems(nonExpiredItems);
-          setExpiredItems(expiredItems);
+          // setExpiredItems(expiredItems);
 
-          await moveExpiredItems(expiredItems, db);
+          // await moveExpiredItems(expiredItems, db);
           await db.query(`DELETE FROM general_items_${formattedName} WHERE expiry_date < ?;`, [currentDate]);
         }
       });
@@ -103,29 +82,24 @@ const ViewGeneralItems: React.FC = () => {
       setItems([]);
     }
   };
-
-  const moveExpiredItems = async (expiredItems: Array<GeneralItem>, db: SQLiteDBConnection | undefined) => {
-    try {
-      for (const item of expiredItems) {
-        await db?.query(
-          `INSERT INTO expired_general_items_${pharmacyName.replace(/\s+/g, '_').toLowerCase()} (id, name, quantity, expiry_date, batch_no, price) VALUES (?, ?, ?, ?, ?, ?)`,
-          [item.id, item.name, item.quantity, item.expiry_date, item.batch_no, item.price]
-        );
-      }
-    } catch (error) {
-      alert((error as Error).message);
-    }
-  };
-
   const updateItem = async () => {
     try {
       await performSQLAction(
         async (db: SQLiteDBConnection | undefined) => {
+          if (!db) {
+            throw new Error("Database connection is not available");
+          }
           const formattedName = pharmacyName.replace(/\s+/g, '_').toLowerCase();
-          await db?.query(
-            `UPDATE general_items_${formattedName} SET name=?, quantity=?, expiry_date=?, batch_no=?, price=? WHERE id=?`,
+  
+          // Ensure the table name is dynamically formatted
+          const tableName = `general_items_${formattedName}`;
+  
+          // Use the run method for update operations
+          await db.run(
+            `UPDATE ${tableName} SET name=?,  quantity=?, expiry_date=?, batch_no=?, price=? WHERE id=?`,
             [
               inputName,
+             
               inputQuantity,
               inputExpiryDate,
               inputBatchNo,
@@ -133,8 +107,12 @@ const ViewGeneralItems: React.FC = () => {
               editItem?.id,
             ]
           );
-
-          loadData(); // Reload data to refresh the list
+  
+          // Optionally, fetch and update items after the update
+          const respSelect = await db.query(`SELECT * FROM ${tableName};`);
+          setItems(respSelect?.values || []);
+        },
+        async () => {
           resetInputs();
         }
       );
@@ -147,9 +125,24 @@ const ViewGeneralItems: React.FC = () => {
     try {
       await performSQLAction(
         async (db: SQLiteDBConnection | undefined) => {
+          if (!db) {
+            throw new Error("Database connection is not available");
+          }
           const formattedName = pharmacyName.replace(/\s+/g, '_').toLowerCase();
-          await db?.query(`DELETE FROM general_items_${formattedName} WHERE id=?;`, [itemId]);
-          loadData(); // Reload data to refresh the list
+          const tableName = `general_items_${formattedName}`;
+  
+          // Use the run method for delete operations
+          await db.run(
+            `DELETE FROM ${tableName} WHERE id=?`,
+            [itemId]
+          );
+  
+          // Optionally, fetch and update items after deletion
+          const respSelect = await db.query(`SELECT * FROM ${tableName};`);
+          setItems(respSelect?.values || []);
+        },
+        async () => {
+          resetInputs();
         }
       );
     } catch (error) {
@@ -158,9 +151,16 @@ const ViewGeneralItems: React.FC = () => {
   };
 
   const confirmDelete = (itemId: number) => {
-    showConfirmationAlert("Are You Sure You Want To Delete This Item?", () => {
-      deleteItem(itemId);
-    });
+    showConfirmationAlert(
+      "Are you sure you want to delete this item?",
+      async () => {
+        try {
+          await deleteItem(itemId);
+        } catch (error) {
+          console.error("Error confirming delete:", error);
+        }
+      }
+    );
   };
 
   const doEditItem = (item: GeneralItem | undefined) => {
@@ -187,10 +187,10 @@ const ViewGeneralItems: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader className='headercls'>
-        <IonToolbar>
+      <IonHeader className='headerclass'>
+        
           <IonTitle>View General Items</IonTitle>
-        </IonToolbar>
+        
       </IonHeader>
       <IonContent fullscreen className="ion-padding">
         <IonGrid>
@@ -269,12 +269,13 @@ const ViewGeneralItems: React.FC = () => {
             </IonButton>
           </>
         )}
+         <IonFooter>
+          <IonButton expand="full" color="primary" onClick={loadData}>Refresh</IonButton>
+        </IonFooter>
+
+        {ConfirmationAlert}
       </IonContent>
-      <IonFooter>
-        <IonButton routerLink={`/add/general-items/${pharmacyName.replace(/\s+/g, '_')}`} expand="full">
-          Back to General Items
-        </IonButton>
-      </IonFooter>
+      
     </IonPage>
   );
 };

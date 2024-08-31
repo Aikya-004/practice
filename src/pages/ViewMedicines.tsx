@@ -37,7 +37,6 @@ const ViewMedicines: React.FC = () => {
   const location = useLocation();
   const pharmacyName = (location.state as RouteState)?.pharmacyName || '';
   const [items, setItems] = useState<Array<MedicineItem>>([]);
-  // const [expiredItems, setExpiredItems] = useState<Array<MedicineItem>>([]);
   const [editItem, setEditItem] = useState<MedicineItem | undefined>();
   const [inputName, setInputName] = useState("");
   const [inputType, setInputType] = useState("");
@@ -78,8 +77,6 @@ const ViewMedicines: React.FC = () => {
     }
   };
 
-  
-
   const updateItem = async () => {
     try {
       await performSQLAction(
@@ -88,11 +85,8 @@ const ViewMedicines: React.FC = () => {
             throw new Error("Database connection is not available");
           }
           const formattedName = pharmacyName.replace(/\s+/g, '_').toLowerCase();
-  
-          // Ensure the table name is dynamically formatted
           const tableName = `medicines_${formattedName}`;
   
-          // Use the run method for update operations
           await db.run(
             `UPDATE ${tableName} SET name=?, type=?, quantity=?, expiry_date=?, batch_no=?, price=? WHERE id=?`,
             [
@@ -106,7 +100,6 @@ const ViewMedicines: React.FC = () => {
             ]
           );
   
-          // Optionally, fetch and update items after the update
           const respSelect = await db.query(`SELECT * FROM ${tableName};`);
           setItems(respSelect?.values || []);
         },
@@ -118,7 +111,6 @@ const ViewMedicines: React.FC = () => {
       alert((error as Error).message);
     }
   };
-  
 
   const deleteItem = async (itemId: number) => {
     try {
@@ -130,13 +122,11 @@ const ViewMedicines: React.FC = () => {
           const formattedName = pharmacyName.replace(/\s+/g, '_').toLowerCase();
           const tableName = `medicines_${formattedName}`;
   
-          // Use the run method for delete operations
           await db.run(
             `DELETE FROM ${tableName} WHERE id=?`,
             [itemId]
           );
   
-          // Optionally, fetch and update items after deletion
           const respSelect = await db.query(`SELECT * FROM ${tableName};`);
           setItems(respSelect?.values || []);
         },
@@ -148,7 +138,6 @@ const ViewMedicines: React.FC = () => {
       alert((error as Error).message);
     }
   };
-  
 
   const confirmDelete = (itemId: number) => {
     showConfirmationAlert(
@@ -187,46 +176,44 @@ const ViewMedicines: React.FC = () => {
     setInputPrice(undefined);
   };
 
-  const formattedPharmacyName = pharmacyName.replace(/\s+/g, '_');
-
   return (
     <IonPage>
-      <IonHeader className='headercls'>
-       
-          <IonTitle>View Medicines</IonTitle>
-        
+      <IonHeader className='headerclass'>
+        <IonTitle>View Medicines</IonTitle>
       </IonHeader>
       <IonContent fullscreen className="ion-padding">
-        <IonGrid>
-          <IonRow className='titles'>
-            <IonCol className='tablecol'>S.No</IonCol>
-            <IonCol className='tablecol'>Name</IonCol>
-            <IonCol className='tablecol'>Type</IonCol>
-            <IonCol className='tablecol'>Quantity</IonCol>
-            <IonCol className='tablecol'>Expiry Date</IonCol>
-            <IonCol className='tablecol'>Batch No</IonCol>
-            <IonCol className='tablecol'>Price</IonCol>
-            <IonCol className='tablecol'>Edit</IonCol>
-            <IonCol className='tablecol'>Delete</IonCol>
-          </IonRow>
-          {items.map((item, index) => (
-            <IonRow key={item.id}>
-              <IonCol className='tablecol'>{index + 1}</IonCol>
-              <IonCol className='tablecol'>{item.name}</IonCol>
-              <IonCol className='tablecol'>{item.type}</IonCol>
-              <IonCol className='tablecol'>{item.quantity}</IonCol>
-              <IonCol className='tablecol'>{item.expiry_date}</IonCol>
-              <IonCol className='tablecol'>{item.batch_no}</IonCol>
-              <IonCol className='tablecol'>{item.price}</IonCol>
-              <IonCol className='tablecol'>
-                <IonButton color="light" onClick={() => doEditItem(item)}>EDIT</IonButton>
-              </IonCol>
-              <IonCol className='tablecol'>
-                <IonButton color="light" onClick={() => confirmDelete(item.id)}>DELETE</IonButton>
-              </IonCol>
+        <div className="table-container">
+          <IonGrid className="table-grid">
+            <IonRow className='titles'>
+              <IonCol className='tablecol'>S.No</IonCol>
+              <IonCol className='tablecol'>Name</IonCol>
+              <IonCol className='tablecol'>Type</IonCol>
+              <IonCol className='tablecol'>Quantity</IonCol>
+              <IonCol className='tablecol'>Expiry Date</IonCol>
+              <IonCol className='tablecol'>Batch No</IonCol>
+              <IonCol className='tablecol'>Price</IonCol>
+              <IonCol className='tablecol'>Edit</IonCol>
+              <IonCol className='tablecol'>Delete</IonCol>
             </IonRow>
-          ))}
-        </IonGrid>
+            {items.map((item, index) => (
+              <IonRow key={item.id}>
+                <IonCol className='tablecol'>{index + 1}</IonCol>
+                <IonCol className='tablecol'>{item.name}</IonCol>
+                <IonCol className='tablecol'>{item.type}</IonCol>
+                <IonCol className='tablecol'>{item.quantity}</IonCol>
+                <IonCol className='tablecol'>{item.expiry_date}</IonCol>
+                <IonCol className='tablecol'>{item.batch_no}</IonCol>
+                <IonCol className='tablecol'>{item.price}</IonCol>
+                <IonCol className='tablecol'>
+                  <IonButton color="light" onClick={() => doEditItem(item)}>EDIT</IonButton>
+                </IonCol>
+                <IonCol className='tablecol'>
+                  <IonButton color="light" onClick={() => confirmDelete(item.id)}>DELETE</IonButton>
+                </IonCol>
+              </IonRow>
+            ))}
+          </IonGrid>
+        </div>
 
         {editItem && (
           <>
@@ -275,7 +262,7 @@ const ViewMedicines: React.FC = () => {
               <IonInput
                 type="number"
                 value={inputPrice}
-                onIonChange={(e) => setInputPrice(parseFloat(e.detail.value as string))}
+                onIonChange={(e) => setInputPrice(Number(e.detail.value))}
               />
             </IonItem>
             <IonButton expand="full" onClick={updateItem}>Update Item</IonButton>

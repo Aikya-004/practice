@@ -119,15 +119,17 @@ const Search: React.FC = () => {
     });
   };
 
-  const addToCart = async (item: any, quantity: number) => {
-    if (quantity <= 0 || quantity > item.quantity) {
+  const addToCart = async (item: any, quantity?: number) => {
+    // Default quantity to 1 if not provided or invalid
+    const validQuantity = quantity && quantity > 0 ? quantity : 1;
+
+    if (validQuantity > item.quantity) {
       setToastMessage("Invalid quantity.");
       setShowToast(true);
       return;
     }
 
-    const newItem = { ...item, quantity };
-    const newQuantity = item.quantity - quantity;
+    const newQuantity = item.quantity - validQuantity;
 
     await performSQLAction(async (db) => {
       if (db) {
@@ -139,11 +141,15 @@ const Search: React.FC = () => {
     });
 
     let cartItems = JSON.parse(localStorage.getItem(`cartItems_${pharmacyName}`) || "[]");
+    const existingItemIndex = cartItems.findIndex((cartItem: any) => cartItem.id === item.id && cartItem.type === searchType);
 
-    newItem.type = searchType;
-    cartItems.push(newItem);
+    if (existingItemIndex > -1) {
+      cartItems[existingItemIndex].quantity += validQuantity;
+    } else {
+      cartItems.push({ ...item, quantity: validQuantity, type: searchType });
+    }
+
     localStorage.setItem(`cartItems_${pharmacyName}`, JSON.stringify(cartItems));
-    console.log(cartItems);
     setToastMessage("Item added to cart.");
     setShowToast(true);
 

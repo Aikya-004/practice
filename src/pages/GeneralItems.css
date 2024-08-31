@@ -1,70 +1,69 @@
 .headercls{
-    color:black;
-    height: 13%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    background-color: pink;
-    font-size:xx-large;
-    box-shadow: 100px 100px 1000px lightskyblue;
-    border: 2px solid lightskyblue;
+   color:black;
+   height: 13%;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+   background-color: pink;
+   font-size:xx-large;
+   box-shadow: 100px 100px 1000px lightskyblue;
+   border: 2px solid lightskyblue;
 }
 .form-buttons ,.form-button2{
-    background-color: white;
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-    margin-bottom: 10px
-  }
+   background-color: white;
+   display: flex;
+   justify-content: center;
+   margin-top: 20px;
+   margin-bottom: 10px
+ }
 
-  .footer {
-    color: black;
-    height: 10%;
-    background-color: pink;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-weight: 650;
-    
-  }
-  .form-container {
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 10px;
-    /* background-color: brown; */
-  }
- .itemcls{
-    margin-top: 15px;
-    --background:white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    
-    
-    
+ .footer {
+   color: black;
+   height: 10%;
+   background-color: pink;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   flex-direction: column;
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   font-weight: 650;
+   
  }
- .labelcls{
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-weight: bold;
-    color: bl;
-    
+ .form-container {
+   max-width: 500px;
+   margin: 0 auto;
+   padding: 10px;
+   /* background-color: brown; */
  }
- .titles{
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-weight: bold;
- }
- .titles{
-    border: 2px solid black;
- }
- .tablecol{
-    border: 2px solid black;
- }
- .required {
-   color: red;
+.itemcls{
+   margin-top: 15px;
+   --background:white;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+   
+   
+   
+}
+.labelcls{
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
    font-weight: bold;
- }
- 
+   color: bl;
+   
+}
+.titles{
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   font-weight: bold;
+}
+.titles{
+   border: 2px solid black;
+}
+.tablecol{
+   border: 2px solid black;
+}
+.required {
+  color: red;
+  font-weight: bold;
+}

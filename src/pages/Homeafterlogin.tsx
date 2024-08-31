@@ -28,7 +28,10 @@ const Home: React.FC = () => {
       state: { pharmacyName }
     });
   };
-  
+  const handlelogout = () => {
+    localStorage.clear();
+    // Redirect to login page or perform other logout actions
+};
 
 
 
@@ -37,7 +40,7 @@ const Home: React.FC = () => {
     <IonPage>
       <IonHeader className='pgcolor'>
         <div className="hd-button">
-          <IonButton shape="round" color="light"  routerLink='/home'>LogOut</IonButton>
+          <IonButton shape="round" color="light" onClick={handlelogout} routerLink='/home'>LogOut</IonButton>
           
         </div>
       </IonHeader>
@@ -72,7 +75,7 @@ const Home: React.FC = () => {
       </IonContent>
       <IonFooter className='footer'>
         <IonText>Contact Us : 9010203040</IonText>
-        <IonText>Email : abc@gmail.com</IonText>
+        <IonText>Email : {pharmacyName.replace(/\s+/g, '_')}@gmail.com</IonText>
       </IonFooter>
     </IonPage>
   );
